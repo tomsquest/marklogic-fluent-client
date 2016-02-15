@@ -23,7 +23,7 @@ Optional parameters :
 client
   .write(person)
   .toUri("/people/1.json")
-  .inCollection("people")
+  .inCollections("people")
   .transformedBy(myTransform)
   .withTriples(rdfTriples)
   .inTransaction(tran)

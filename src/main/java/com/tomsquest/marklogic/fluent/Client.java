@@ -17,7 +17,7 @@ public class Client {
     }
 
     public Transaction openTransaction() {
-        return new Transaction(this);
+        return config.getTransactionOpener().openTransaction(this);
     }
 
     public Client inTransaction(Consumer<Transaction> consumer) {

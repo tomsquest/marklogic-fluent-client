@@ -21,7 +21,7 @@ public class TextWriter implements Writer {
     @Override
     public void write(Client.WriteOperation writeOperation) {
         try {
-            URIBuilder uriBuilder = new URIBuilder(config.getUrl());
+            URIBuilder uriBuilder = new URIBuilder(config.getUrl() + "/LATEST/documents");
             uriBuilder.addParameter("uri", writeOperation.getUri());
 
             if (writeOperation.getCollections() != null) {

@@ -1,9 +1,5 @@
 package com.tomsquest.marklogic.fluent;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 public class Transform {
     public final String name;
 

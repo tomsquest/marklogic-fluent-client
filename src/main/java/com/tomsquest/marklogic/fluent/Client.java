@@ -1,5 +1,13 @@
 package com.tomsquest.marklogic.fluent;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.fluent.Executor;
+import org.apache.http.client.fluent.Request;
+import org.apache.http.client.utils.URIBuilder;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
@@ -12,12 +20,9 @@ public class Client {
         this.config = config;
     }
 
-    public WriteToUri write(Object value) {
-        return new WriteExecution(this, value);
-    }
-
     public Transaction openTransaction() {
-        return config.getTransactionOpener().openTransaction(this);
+        Transaction transaction = new Transaction(this);
+        return transaction.open();
     }
 
     public Client inTransaction(Consumer<Transaction> consumer) {
@@ -29,6 +34,60 @@ public class Client {
             tran.rollback();
         }
         return this;
+    }
+
+    public boolean exists(String uri) {
+        try {
+            URIBuilder uriBuilder = new URIBuilder(config.getUrl() + "/LATEST/documents");
+            uriBuilder.addParameter("uri", uri);
+
+            HttpResponse response = Executor
+                    .newInstance()
+                    .auth(AuthScope.ANY, new UsernamePasswordCredentials(
+                            config.getUser(),
+                            config.getPass())
+                    )
+                    .execute(Request.Head(uriBuilder.build()))
+                    .returnResponse();
+
+            if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                return true;
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        return false;
+    }
+
+    public Client delete(String... uris) {
+        try {
+            URIBuilder uriBuilder = new URIBuilder(config.getUrl() + "/LATEST/documents");
+            Arrays.asList(uris).forEach(uri -> uriBuilder.addParameter("uri", uri));
+
+            HttpResponse response = Executor
+                    .newInstance()
+                    .auth(AuthScope.ANY, new UsernamePasswordCredentials(
+                            config.getUser(),
+                            config.getPass())
+                    )
+                    .execute(Request.Delete(uriBuilder.build()))
+                    .returnResponse();
+
+            if (response.getStatusLine().getStatusCode() == HttpStatus.SC_NO_CONTENT) {
+                // TODO log success
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        return this;
+    }
+
+    public WriteToUri write(Object value) {
+        return new WriteExecution(this, value);
     }
 
     public interface WriteToUri {

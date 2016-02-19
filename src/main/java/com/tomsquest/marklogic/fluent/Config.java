@@ -41,10 +41,6 @@ public class Config {
         throw new UnsupportedOperationException("not implemented");
     }
 
-    public TransactionOpener getTransactionOpener() {
-        return new TransactionOpener(this);
-    }
-
     public enum AuthMethod {
         DIGEST
     }

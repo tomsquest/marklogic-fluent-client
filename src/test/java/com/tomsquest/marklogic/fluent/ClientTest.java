@@ -33,24 +33,4 @@ public class ClientTest {
             transaction.rollback();
         }
     }
-
-    @Test
-    public void two_writes_in_single_transaction_given_transaction_opened_by_client() throws Exception {
-        client.inTransaction((tran) -> {
-            client.write("{}").toUri("/foo").inTransaction(tran).asString();
-            client.write("{}").toUri("/bar").inTransaction(tran).asString();
-        });
-    }
-
-    @Test
-    public void two_writes_in_single_transaction_given_manually_opened_transaction() throws Exception {
-        Transaction tran = client.openTransaction();
-        try {
-            client.write("{}").toUri("/foo").inTransaction(tran).asString();
-            client.write("{}").toUri("/bar").inTransaction(tran).asString();
-            tran.commit();
-        } catch (Exception e) {
-            tran.rollback();
-        }
-    }
 }

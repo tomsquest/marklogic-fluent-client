@@ -28,6 +28,10 @@ public class TextWriter implements Writer {
                 writeOperation.getCollections().forEach(coll -> uriBuilder.addParameter("collection", coll));
             }
 
+            if (writeOperation.getTransaction() != null) {
+                uriBuilder.addParameter("txid", writeOperation.getTransaction().getTransactionId());
+            }
+
             // TODO transaction ID + HostID
             // TODO transform + params
             // TODO triples

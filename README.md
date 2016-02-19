@@ -40,7 +40,10 @@ new Client().inTransaction((client, tran) -> {
 ```
 # TODO
 
-* [ ] Configuration `Client` 
+* [ ] Handle `HostId` cookie used for load-balancing : manual or using HttpClient's CookieStore
+* [ ] Logging
+* [ ] Parameter validation
+* [ ] Configurable `Client` 
     * [ ] Writer for XML
     * [ ] Writer for JSON
     * [ ] Choice of HTTP client implementation : not only Apache's HttpClient, consider using Google http-java-client to wrap other clients

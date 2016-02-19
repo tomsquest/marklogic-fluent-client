@@ -9,7 +9,9 @@ public class Triples {
     public Triples() {
     }
 
-    /** Convenient constructor to create a new Triples with a single Triple */
+    /**
+     * Convenient constructor to create a new Triples with a single Triple
+     */
     public Triples(String subject, String predicate, Object object) {
         this.values.add(new Triple(subject, predicate, object));
     }

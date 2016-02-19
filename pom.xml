@@ -46,7 +46,7 @@
       <id>thomas-queste</id>
       <name>Thomas Queste</name>
       <email>tom at tomsquest.com</email>
-      <organization>Tom's Queste</organization>
+      <organization>Tom's Quest</organization>
       <organizationUrl>http://www.tomsquest.com</organizationUrl>
       <roles>
         <role>Owner</role>
@@ -114,28 +114,16 @@
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-core</artifactId>
+      <version>3.2.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-all</artifactId>
       <version>1.10.19</version>
       <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.assertj</groupId>
-      <artifactId>assertj-core</artifactId>
-      <version>2.2.0</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.sun.jersey.contribs</groupId>
-      <artifactId>jersey-apache-client4</artifactId>
-      <version>1.17</version>
-      <scope>test</scope>
-      <exclusions>
-        <exclusion>
-          <groupId>commons-logging</groupId>
-          <artifactId>commons-logging</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
   </dependencies>
 

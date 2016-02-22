@@ -1,51 +1,28 @@
 package com.tomsquest.marklogic.fluent;
 
-import java.util.Locale;
+import org.apache.http.impl.client.CloseableHttpClient;
 
 public class Config {
-    private final String url;
-    private final String user;
-    private final String pass;
-    private final AuthMethod authMethod;
 
-    public Config(Scheme scheme, String host, int port, String user, String pass, AuthMethod authMethod) {
-        this.url = scheme.name().toLowerCase(Locale.ENGLISH) + "://" + host + ":" + port;
-        this.user = user;
-        this.pass = pass;
-        this.authMethod = authMethod;
+    private final Auth auth;
+
+    private Config(Auth.Scheme scheme, String host, int port, String user, String pass, Auth.AuthMethod method) {
+        this.auth = new Auth(scheme, host, port, user, pass, method, "public");
     }
 
-    public String getUrl() {
-        return url;
+    public static Config digest(String host, int port, String user, String pass) {
+        return new Config(Auth.Scheme.HTTP, host, port, user, pass, Auth.AuthMethod.DIGEST);
     }
 
-    public String getUser() {
-        return user;
+    public Auth getAuth() {
+        return auth;
     }
 
-    public String getPass() {
-        return pass;
+    public CloseableHttpClient buildHttpClient() {
+        return new HttpClientBuilder().build(auth);
     }
 
-    public Writer getTextWriter() {
-        return new TextWriter(this);
-    }
-
-    public Writer getJsonWriter() {
-        // TODO impl
-        throw new UnsupportedOperationException("not implemented");
-    }
-
-    public Writer getXmlWriter() {
-        // TODO impl
-        throw new UnsupportedOperationException("not implemented");
-    }
-
-    public enum AuthMethod {
-        DIGEST
-    }
-
-    public enum Scheme {
-        HTTP
+    public TextWriterBuilder getTextWriterBuilder() {
+        return new TextWriterBuilder();
     }
 }

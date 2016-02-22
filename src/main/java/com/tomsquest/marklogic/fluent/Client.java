@@ -2,22 +2,47 @@ package com.tomsquest.marklogic.fluent;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.fluent.Executor;
 import org.apache.http.client.fluent.Request;
 import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.impl.client.CloseableHttpClient;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class Client {
+public class Client implements AutoCloseable {
 
-    final Config config;
+    private final Auth auth;
+    private final String serverUrl;
+    private final CloseableHttpClient httpClient;
+    private final TextWriter textWriter;
 
     public Client(Config config) {
-        this.config = config;
+        this.auth = config.getAuth();
+        this.serverUrl = auth.getServerUrl();
+        this.httpClient = config.buildHttpClient();
+        this.textWriter = config.getTextWriterBuilder().build(this);
+    }
+
+    @Override
+    public void close() {
+        try {
+            if (httpClient != null) {
+                httpClient.close();
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public String getServerUrl() {
+        return serverUrl;
+    }
+
+    public CloseableHttpClient getHttpClient() {
+        return httpClient;
     }
 
     public Transaction openTransaction() {
@@ -38,15 +63,11 @@ public class Client {
 
     public boolean exists(String uri) {
         try {
-            URIBuilder uriBuilder = new URIBuilder(config.getUrl() + "/LATEST/documents");
+            URIBuilder uriBuilder = new URIBuilder(serverUrl + "/v1/documents");
             uriBuilder.addParameter("uri", uri);
 
             HttpResponse response = Executor
-                    .newInstance()
-                    .auth(AuthScope.ANY, new UsernamePasswordCredentials(
-                            config.getUser(),
-                            config.getPass())
-                    )
+                    .newInstance(httpClient)
                     .execute(Request.Head(uriBuilder.build()))
                     .returnResponse();
 
@@ -63,15 +84,11 @@ public class Client {
 
     public Client delete(String... uris) {
         try {
-            URIBuilder uriBuilder = new URIBuilder(config.getUrl() + "/LATEST/documents");
+            URIBuilder uriBuilder = new URIBuilder(serverUrl + "/v1/documents");
             Arrays.asList(uris).forEach(uri -> uriBuilder.addParameter("uri", uri));
 
             HttpResponse response = Executor
-                    .newInstance()
-                    .auth(AuthScope.ANY, new UsernamePasswordCredentials(
-                            config.getUser(),
-                            config.getPass())
-                    )
+                    .newInstance(httpClient)
                     .execute(Request.Delete(uriBuilder.build()))
                     .returnResponse();
 
@@ -111,7 +128,7 @@ public class Client {
     }
 
     public interface WriteMethod {
-        void asString();
+        void asText();
 
         void asJson();
 
@@ -133,7 +150,7 @@ public class Client {
         }
     }
 
-    static class WriteOperation implements WriteInTransaction {
+    /* package */ static class WriteOperation implements WriteInTransaction {
         private final Client client;
         private final Object value;
         private final String uri;
@@ -173,18 +190,20 @@ public class Client {
         }
 
         @Override
-        public void asString() {
-            client.config.getTextWriter().write(this);
+        public void asText() {
+            client.textWriter.write(this);
         }
 
         @Override
         public void asJson() {
-            client.config.getJsonWriter().write(this);
+            // TODO impl
+            throw new UnsupportedOperationException("not implemented");
         }
 
         @Override
         public void asXml() {
-            client.config.getXmlWriter().write(this);
+            // TODO impl
+            throw new UnsupportedOperationException("not implemented");
         }
 
         @Override

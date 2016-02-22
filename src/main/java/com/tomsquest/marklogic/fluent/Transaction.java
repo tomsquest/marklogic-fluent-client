@@ -3,14 +3,10 @@ package com.tomsquest.marklogic.fluent;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.fluent.Executor;
 import org.apache.http.client.fluent.Request;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.ContentType;
-import org.apache.http.impl.client.HttpClients;
 
 import java.nio.charset.StandardCharsets;
 
@@ -27,19 +23,14 @@ public class Transaction {
 
     public Transaction open() {
         try {
-            URIBuilder uriBuilder = new URIBuilder(client.config.getUrl() + "/LATEST/transactions");
+            URIBuilder uriBuilder = new URIBuilder(client.getServerUrl() + "/v1/transactions");
 
             Request request = Request
                     .Post(uriBuilder.build())
                     .bodyString("", ContentType.TEXT_PLAIN.withCharset(StandardCharsets.UTF_8));
 
-            HttpClient httpClient = HttpClients.custom().disableRedirectHandling().build();
             HttpResponse response = Executor
-                    .newInstance(httpClient)
-                    .auth(AuthScope.ANY, new UsernamePasswordCredentials(
-                            client.config.getUser(),
-                            client.config.getPass())
-                    )
+                    .newInstance(client.getHttpClient())
                     .execute(request)
                     .returnResponse();
 
@@ -54,16 +45,11 @@ public class Transaction {
 
     public void commit() {
         try {
-            URIBuilder uriBuilder = new URIBuilder(client.config.getUrl() + "/LATEST/transactions/" + transactionId)
+            URIBuilder uriBuilder = new URIBuilder(client.getServerUrl() + "/v1/transactions/" + transactionId)
                     .addParameter("result", "commit");
 
-            HttpClient httpClient = HttpClients.custom().disableRedirectHandling().build();
             HttpResponse response = Executor
-                    .newInstance(httpClient)
-                    .auth(AuthScope.ANY, new UsernamePasswordCredentials(
-                            client.config.getUser(),
-                            client.config.getPass())
-                    )
+                    .newInstance(client.getHttpClient())
                     .execute(Request.Post(uriBuilder.build()))
                     .returnResponse();
 
@@ -78,16 +64,11 @@ public class Transaction {
 
     public void rollback() {
         try {
-            URIBuilder uriBuilder = new URIBuilder(client.config.getUrl() + "/LATEST/transactions/" + transactionId)
+            URIBuilder uriBuilder = new URIBuilder(client.getServerUrl() + "/v1/transactions/" + transactionId)
                     .addParameter("result", "rollback");
 
-            HttpClient httpClient = HttpClients.custom().disableRedirectHandling().build();
             HttpResponse response = Executor
-                    .newInstance(httpClient)
-                    .auth(AuthScope.ANY, new UsernamePasswordCredentials(
-                            client.config.getUser(),
-                            client.config.getPass())
-                    )
+                    .newInstance(client.getHttpClient())
                     .execute(Request.Post(uriBuilder.build()))
                     .returnResponse();
 

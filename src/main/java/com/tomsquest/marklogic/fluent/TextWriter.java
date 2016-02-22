@@ -1,27 +1,27 @@
 package com.tomsquest.marklogic.fluent;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.HttpStatus;
 import org.apache.http.client.fluent.Executor;
 import org.apache.http.client.fluent.Request;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.ContentType;
 
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 
 public class TextWriter implements Writer {
 
-    private final Config config;
+    private final Client client;
 
-    public TextWriter(Config config) {
-        this.config = config;
+    public TextWriter(Client client) {
+        this.client = client;
     }
 
     @Override
     public void write(Client.WriteOperation writeOperation) {
         try {
-            URIBuilder uriBuilder = new URIBuilder(config.getUrl() + "/LATEST/documents");
+            URIBuilder uriBuilder = new URIBuilder(client.getServerUrl() + "/v1/documents");
             uriBuilder.addParameter("uri", writeOperation.getUri());
 
             if (writeOperation.getCollections() != null) {
@@ -32,26 +32,26 @@ public class TextWriter implements Writer {
                 uriBuilder.addParameter("txid", writeOperation.getTransaction().getTransactionId());
             }
 
-            // TODO transaction ID + HostID
             // TODO transform + params
             // TODO triples
 
+            URI uri = uriBuilder.build();
             Request request = Request
-                    .Put(uriBuilder.build())
+                    .Put(uri)
                     .bodyString(
                             writeOperation.getValue().toString(),
                             ContentType.TEXT_PLAIN.withCharset(StandardCharsets.UTF_8));
 
             HttpResponse response = Executor
-                    .newInstance()
-                    .auth(AuthScope.ANY, new UsernamePasswordCredentials(
-                            config.getUser(),
-                            config.getPass())
-                    )
+                    .newInstance(client.getHttpClient())
                     .execute(request)
                     .returnResponse();
 
-            System.out.println("response = " + response.getStatusLine());
+            if (response.getStatusLine().getStatusCode() == HttpStatus.SC_CREATED) {
+                // TODO log success
+            } else {
+                throw new RuntimeException("Unable to write to uri '" + uri + "'. Response: " + response.getStatusLine());
+            }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

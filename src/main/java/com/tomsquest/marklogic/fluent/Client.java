@@ -17,14 +17,12 @@ import java.util.function.Consumer;
 public class Client implements AutoCloseable {
 
     private static final Logger LOG = LoggerFactory.getLogger(Client.class);
-    private final Auth auth;
     private final String serverUrl;
     private final CloseableHttpClient httpClient;
     private final TextWriter textWriter;
 
     public Client(Config config) {
-        this.auth = config.getAuth();
-        this.serverUrl = auth.getServerUrl();
+        this.serverUrl = config.getAuth().getServerUrl();
         this.httpClient = config.buildHttpClient();
         this.textWriter = config.getTextWriterBuilder().build(this);
     }

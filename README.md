@@ -38,6 +38,19 @@ new Client().inTransaction((client, tran) -> {
     client.write("{}").toUri("/bar").asString();
 });
 ```
+
+# Development
+
+Tested with
+* Marklogic 8.0.4
+* Java 8
+
+Assuming you have a Marklogic instance running on localhost:8010 (user/pass: admin/admindev), run :
+
+``` shell
+mvn clean verify
+```
+
 # TODO
 
 * [ ] Handle `HostId` cookie used for load-balancing : manual or using HttpClient's CookieStore

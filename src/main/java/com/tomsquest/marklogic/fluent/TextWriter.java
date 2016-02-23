@@ -53,10 +53,10 @@ public class TextWriter implements Writer {
             if (response.getStatusLine().getStatusCode() == HttpStatus.SC_CREATED) {
                 LOG.info("Success writing to {}", uri);
             } else {
-                throw new RuntimeException("Unable to write to uri '" + uri + "'. Response: " + response.getStatusLine());
+                throw new FluentClientException("Unable to write to uri '" + uri + "'. Response: " + response.getStatusLine());
             }
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new FluentClientException(e);
         }
     }
 }

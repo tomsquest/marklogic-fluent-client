@@ -31,12 +31,12 @@ public class Client implements AutoCloseable {
 
     @Override
     public void close() {
-        try {
-            if (httpClient != null) {
+        if (httpClient != null) {
+            try {
                 httpClient.close();
+            } catch (IOException e) {
+                throw new FluentClientException("Unable to close http client: " + httpClient, e);
             }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
     }
 
@@ -49,8 +49,7 @@ public class Client implements AutoCloseable {
     }
 
     public Transaction openTransaction() {
-        Transaction transaction = new Transaction(this);
-        return transaction.open();
+        return new Transaction(this).open();
     }
 
     public Client inTransaction(Consumer<Transaction> consumer) {
@@ -79,7 +78,7 @@ public class Client implements AutoCloseable {
             }
 
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new FluentClientException(e);
         }
 
         return false;
@@ -100,7 +99,7 @@ public class Client implements AutoCloseable {
             }
 
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new FluentClientException(e);
         }
 
         return this;

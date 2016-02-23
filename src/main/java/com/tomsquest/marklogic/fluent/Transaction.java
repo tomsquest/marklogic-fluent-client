@@ -44,7 +44,7 @@ public class Transaction {
 
             return this;
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new FluentClientException(e);
         }
     }
 
@@ -62,7 +62,7 @@ public class Transaction {
                 LOG.info("{} commited", this);
             }
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new FluentClientException(e);
         }
     }
 
@@ -80,7 +80,7 @@ public class Transaction {
                 LOG.info("{} rollbacked", this);
             }
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new FluentClientException(e);
         }
     }
 
@@ -97,7 +97,7 @@ public class Transaction {
             }
         }
 
-        throw new RuntimeException("Unable to get transactionId from response. Response: " + response);
+        throw new FluentClientException("Unable to get transactionId from response. Response: " + response);
     }
 
     private String extractHostId(HttpResponse response) {
@@ -109,7 +109,7 @@ public class Transaction {
             }
         }
 
-        throw new RuntimeException("Unable to get hostId cookie from response. Response: " + response);
+        throw new FluentClientException("Unable to get hostId cookie from response. Response: " + response);
     }
 
     @Override

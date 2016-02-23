@@ -54,10 +54,11 @@ public class Client implements AutoCloseable {
         Transaction tran = openTransaction();
         try {
             consumer.accept(tran);
-            tran.commit();
         } catch (Exception e) {
+            LOG.error("Exception thrown by consumer: " + e.getMessage(), e);
             tran.rollback();
         }
+        tran.commit();
         return this;
     }
 

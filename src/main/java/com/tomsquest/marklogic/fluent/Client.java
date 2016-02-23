@@ -73,14 +73,15 @@ public class Client implements AutoCloseable {
                     .returnResponse();
 
             if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                LOG.info("Document exists at uri: {}", uri);
                 return true;
             }
 
+            LOG.info("Document does not exist at uri: {}", uri);
+            return false;
         } catch (Exception e) {
             throw new FluentClientException(e);
         }
-
-        return false;
     }
 
     public Client delete(String... uris) {
@@ -93,15 +94,17 @@ public class Client implements AutoCloseable {
                     .execute(Request.Delete(uriBuilder.build()))
                     .returnResponse();
 
-            if (response.getStatusLine().getStatusCode() == HttpStatus.SC_NO_CONTENT) {
+            int receivedStatus = response.getStatusLine().getStatusCode();
+            if (receivedStatus == HttpStatus.SC_NO_CONTENT) {
                 LOG.info("Deleted uris {}", Arrays.toString(uris));
+                return this;
             }
 
+            throw new FluentClientException("Invalid server response: " + response.getStatusLine() + ". "
+                    + "Expected " + HttpStatus.SC_OK + " and got " + receivedStatus);
         } catch (Exception e) {
             throw new FluentClientException(e);
         }
-
-        return this;
     }
 
     public WriteToUri write(Object value) {

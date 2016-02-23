@@ -6,12 +6,15 @@ import org.apache.http.client.fluent.Executor;
 import org.apache.http.client.fluent.Request;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.ContentType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 
 public class TextWriter implements Writer {
 
+    private static final Logger LOG = LoggerFactory.getLogger(TextWriter.class);
     private final Client client;
 
     public TextWriter(Client client) {
@@ -29,7 +32,7 @@ public class TextWriter implements Writer {
             }
 
             if (writeOperation.getTransaction() != null) {
-                uriBuilder.addParameter("txid", writeOperation.getTransaction().getTransactionId());
+                uriBuilder.addParameter("txid", writeOperation.getTransaction().getId());
             }
 
             // TODO transform + params
@@ -48,7 +51,7 @@ public class TextWriter implements Writer {
                     .returnResponse();
 
             if (response.getStatusLine().getStatusCode() == HttpStatus.SC_CREATED) {
-                // TODO log success
+                LOG.info("Success writing to {}", uri);
             } else {
                 throw new RuntimeException("Unable to write to uri '" + uri + "'. Response: " + response.getStatusLine());
             }

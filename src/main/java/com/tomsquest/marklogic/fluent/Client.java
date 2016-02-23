@@ -6,6 +6,8 @@ import org.apache.http.client.fluent.Executor;
 import org.apache.http.client.fluent.Request;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -14,6 +16,7 @@ import java.util.function.Consumer;
 
 public class Client implements AutoCloseable {
 
+    private static final Logger LOG = LoggerFactory.getLogger(Client.class);
     private final Auth auth;
     private final String serverUrl;
     private final CloseableHttpClient httpClient;
@@ -93,7 +96,7 @@ public class Client implements AutoCloseable {
                     .returnResponse();
 
             if (response.getStatusLine().getStatusCode() == HttpStatus.SC_NO_CONTENT) {
-                // TODO log success
+                LOG.info("Deleted uris {}", Arrays.toString(uris));
             }
 
         } catch (Exception e) {

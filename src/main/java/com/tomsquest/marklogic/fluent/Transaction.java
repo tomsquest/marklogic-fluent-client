@@ -7,14 +7,17 @@ import org.apache.http.client.fluent.Executor;
 import org.apache.http.client.fluent.Request;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.ContentType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.charset.StandardCharsets;
 
 public class Transaction {
 
+    private static final Logger LOG = LoggerFactory.getLogger(Transaction.class);
     private final Client client;
 
-    private String transactionId;
+    private String id;
     private String hostId;
 
     public Transaction(Client client) {
@@ -34,8 +37,10 @@ public class Transaction {
                     .execute(request)
                     .returnResponse();
 
-            this.transactionId = extractTransactionId(response);
+            this.id = extractTransactionId(response);
             this.hostId = extractHostId(response);
+
+            LOG.info("{} opened", this);
 
             return this;
         } catch (Exception e) {
@@ -45,7 +50,7 @@ public class Transaction {
 
     public void commit() {
         try {
-            URIBuilder uriBuilder = new URIBuilder(client.getServerUrl() + "/v1/transactions/" + transactionId)
+            URIBuilder uriBuilder = new URIBuilder(client.getServerUrl() + "/v1/transactions/" + id)
                     .addParameter("result", "commit");
 
             HttpResponse response = Executor
@@ -54,9 +59,8 @@ public class Transaction {
                     .returnResponse();
 
             if (response.getStatusLine().getStatusCode() == HttpStatus.SC_NO_CONTENT) {
-                // TODO log success
+                LOG.info("{} commited", this);
             }
-
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -64,7 +68,7 @@ public class Transaction {
 
     public void rollback() {
         try {
-            URIBuilder uriBuilder = new URIBuilder(client.getServerUrl() + "/v1/transactions/" + transactionId)
+            URIBuilder uriBuilder = new URIBuilder(client.getServerUrl() + "/v1/transactions/" + id)
                     .addParameter("result", "rollback");
 
             HttpResponse response = Executor
@@ -73,13 +77,15 @@ public class Transaction {
                     .returnResponse();
 
             if (response.getStatusLine().getStatusCode() == HttpStatus.SC_NO_CONTENT) {
-                // TODO log success
+                LOG.info("{} rollbacked", this);
             }
-
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
 
+    public String getId() {
+        return id;
     }
 
     private String extractTransactionId(HttpResponse response) {
@@ -108,13 +114,6 @@ public class Transaction {
 
     @Override
     public String toString() {
-        return "Transaction{" +
-                "transactionId='" + transactionId + '\'' +
-                ", hostId='" + hostId + '\'' +
-                '}';
-    }
-
-    public String getTransactionId() {
-        return transactionId;
+        return "Transaction{id='" + id + '\'' + ", hostId='" + hostId + '\'' + '}';
     }
 }

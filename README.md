@@ -53,12 +53,15 @@ mvn clean verify
 
 # TODO
 
-* [ ] Handle `HostId` cookie used for load-balancing : manual or using HttpClient's CookieStore
-* [ ] Logging
-* [ ] Parameter validation
-* [ ] Configurable `Client` 
-    * [ ] Writer for XML
-    * [ ] Writer for JSON
-    * [ ] Choice of HTTP client implementation : not only Apache's HttpClient, consider using Google http-java-client to wrap other clients
-* [ ] Handle parameters in `Transform`
-* [ ] Build/Choice of a Triples/RDF implementation (DIY, Apache Jena, Commons-rdf... ?)
+* [ ] Check for the handling of the `HostId` cookie used for load-balancing : manual or using HttpClient's CookieStore
+* [ ] Parameter validation (not nulls...)
+* [ ] Writer for JSON
+* [ ] Parameters in `Transform`
+
+# Future
+
+* Xml Support
+* Config builder
+* Choice of HTTP client implementation : not only Apache's HttpClient, consider using Google http-java-client to wrap other clients
+* Select or build a Triples/RDF implementation (DIY, Jena, Sesame, Commons-rdf...)
+* Fluent reading

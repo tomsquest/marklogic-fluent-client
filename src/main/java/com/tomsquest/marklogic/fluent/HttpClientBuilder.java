@@ -2,7 +2,6 @@ package com.tomsquest.marklogic.fluent;
 
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -21,8 +20,9 @@ public class HttpClientBuilder {
         return HttpClients
                 .custom()
                 .disableRedirectHandling()
+                .disableCookieManagement() // Manual handling of the Transaction "HostId" cookie
                 .setDefaultCredentialsProvider(credentialsProvider)
-                .setDefaultCookieStore(new BasicCookieStore())
                 .build();
     }
+
 }

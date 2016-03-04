@@ -53,10 +53,17 @@ mvn clean verify
 
 # TODO
 
-* [ ] Check for the handling of the `HostId` cookie used for load-balancing : manual or using HttpClient's CookieStore
-* [ ] Parameter validation (not nulls...)
+* [ ] Handle erroneous transaction response
 * [ ] Writer for JSON
+* [ ] Parameter validation (not nulls...)
 * [ ] Parameters in `Transform`
+
+# DONE
+
+* [ ] Working DSL
+* [ ] String/Text writer
+* [ ] Transaction open/commit/rollback
+* [ ] In transaction, add the `HostId` cookie for load-balancing
 
 # Future
 

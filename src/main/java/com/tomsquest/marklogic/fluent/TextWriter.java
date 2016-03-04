@@ -45,6 +45,10 @@ public class TextWriter implements Writer {
                             writeOperation.getValue().toString(),
                             ContentType.TEXT_PLAIN.withCharset(StandardCharsets.UTF_8));
 
+            if (writeOperation.getTransaction() != null) {
+                request.addHeader("Cookie", "HostId=" + writeOperation.getTransaction().getHostId());
+            }
+
             HttpResponse response = Executor
                     .newInstance(client.getHttpClient())
                     .execute(request)

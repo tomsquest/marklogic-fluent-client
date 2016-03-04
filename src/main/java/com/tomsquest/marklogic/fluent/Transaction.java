@@ -24,6 +24,16 @@ public class Transaction {
         this.client = client;
     }
 
+    /**
+     * VisibleForTesting
+     */
+    static Transaction openedTransaction(Client client, String transactionId, String hostId) {
+        Transaction tran = new Transaction(client);
+        tran.id = transactionId;
+        tran.hostId = hostId;
+        return tran;
+    }
+
     public Transaction open() {
         try {
             URIBuilder uriBuilder = new URIBuilder(client.getServerUrl() + "/v1/transactions");
@@ -37,10 +47,11 @@ public class Transaction {
                     .execute(request)
                     .returnResponse();
 
-            this.id = extractTransactionId(response);
-            this.hostId = extractHostId(response);
-
-            LOG.info("{} opened", this);
+            if (response.getStatusLine().getStatusCode() == HttpStatus.SC_SEE_OTHER) {
+                this.id = extractTransactionId(response);
+                this.hostId = extractHostId(response);
+                LOG.info("{} opened", this);
+            }
 
             return this;
         } catch (Exception e) {
@@ -55,7 +66,9 @@ public class Transaction {
 
             HttpResponse response = Executor
                     .newInstance(client.getHttpClient())
-                    .execute(Request.Post(uriBuilder.build()))
+                    .execute(Request
+                            .Post(uriBuilder.build())
+                            .addHeader("Cookie", "HostId=" + hostId))
                     .returnResponse();
 
             if (response.getStatusLine().getStatusCode() == HttpStatus.SC_NO_CONTENT) {
@@ -73,7 +86,9 @@ public class Transaction {
 
             HttpResponse response = Executor
                     .newInstance(client.getHttpClient())
-                    .execute(Request.Post(uriBuilder.build()))
+                    .execute(Request
+                            .Post(uriBuilder.build())
+                            .addHeader("Cookie", "HostId=" + hostId))
                     .returnResponse();
 
             if (response.getStatusLine().getStatusCode() == HttpStatus.SC_NO_CONTENT) {
@@ -86,6 +101,15 @@ public class Transaction {
 
     public String getId() {
         return id;
+    }
+
+    public String getHostId() {
+        return hostId;
+    }
+
+    @Override
+    public String toString() {
+        return "Transaction{id='" + id + '\'' + ", hostId='" + hostId + '\'' + '}';
     }
 
     private String extractTransactionId(HttpResponse response) {
@@ -110,10 +134,5 @@ public class Transaction {
         }
 
         throw new FluentClientException("Unable to get hostId cookie from response. Response: " + response);
-    }
-
-    @Override
-    public String toString() {
-        return "Transaction{id='" + id + '\'' + ", hostId='" + hostId + '\'' + '}';
     }
 }

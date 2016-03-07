@@ -5,12 +5,8 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.fluent.Executor;
 import org.apache.http.client.fluent.Request;
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.entity.ContentType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.nio.charset.StandardCharsets;
 
 public class Transaction {
 
@@ -35,67 +31,35 @@ public class Transaction {
     }
 
     public Transaction open() {
-        try {
-            URIBuilder uriBuilder = new URIBuilder(client.getServerUrl() + "/v1/transactions");
+        HttpResponse response = executePost(client.getServerUrl() + "/v1/transactions/");
 
-            Request request = Request
-                    .Post(uriBuilder.build())
-                    .bodyString("", ContentType.TEXT_PLAIN.withCharset(StandardCharsets.UTF_8));
-
-            HttpResponse response = Executor
-                    .newInstance(client.getHttpClient())
-                    .execute(request)
-                    .returnResponse();
-
-            if (response.getStatusLine().getStatusCode() == HttpStatus.SC_SEE_OTHER) {
-                this.id = extractTransactionId(response);
-                this.hostId = extractHostId(response);
-                LOG.info("{} opened", this);
-            }
-
+        if (response.getStatusLine().getStatusCode() == HttpStatus.SC_SEE_OTHER) {
+            this.id = extractTransactionId(response);
+            this.hostId = extractHostId(response);
+            LOG.info("{} opened", this);
             return this;
-        } catch (Exception e) {
-            throw new FluentClientException(e);
+        } else {
+            throw UnableToOpenTransactionException.invalidServerResponse(response.getStatusLine());
         }
     }
 
     public void commit() {
-        try {
-            URIBuilder uriBuilder = new URIBuilder(client.getServerUrl() + "/v1/transactions/" + id)
-                    .addParameter("result", "commit");
+        HttpResponse response = executePost(client.getServerUrl() + "/v1/transactions/" + id + "?result=commit");
 
-            HttpResponse response = Executor
-                    .newInstance(client.getHttpClient())
-                    .execute(Request
-                            .Post(uriBuilder.build())
-                            .addHeader("Cookie", "HostId=" + hostId))
-                    .returnResponse();
-
-            if (response.getStatusLine().getStatusCode() == HttpStatus.SC_NO_CONTENT) {
-                LOG.info("{} commited", this);
-            }
-        } catch (Exception e) {
-            throw new FluentClientException(e);
+        if (response.getStatusLine().getStatusCode() == HttpStatus.SC_NO_CONTENT) {
+            LOG.info("{} commited", this);
+        } else {
+            throw new UnableToCommitTransactionException(this, response.getStatusLine());
         }
     }
 
     public void rollback() {
-        try {
-            URIBuilder uriBuilder = new URIBuilder(client.getServerUrl() + "/v1/transactions/" + id)
-                    .addParameter("result", "rollback");
+        HttpResponse response = executePost(client.getServerUrl() + "/v1/transactions/" + id + "?result=rollback");
 
-            HttpResponse response = Executor
-                    .newInstance(client.getHttpClient())
-                    .execute(Request
-                            .Post(uriBuilder.build())
-                            .addHeader("Cookie", "HostId=" + hostId))
-                    .returnResponse();
-
-            if (response.getStatusLine().getStatusCode() == HttpStatus.SC_NO_CONTENT) {
-                LOG.info("{} rollbacked", this);
-            }
-        } catch (Exception e) {
-            throw new FluentClientException(e);
+        if (response.getStatusLine().getStatusCode() == HttpStatus.SC_NO_CONTENT) {
+            LOG.info("{} rollbacked", this);
+        } else {
+            throw new UnableToRollbackTransactionException(this, response.getStatusLine());
         }
     }
 
@@ -121,7 +85,7 @@ public class Transaction {
             }
         }
 
-        throw new FluentClientException("Unable to get transactionId from response. Response: " + response);
+        throw UnableToOpenTransactionException.noTransactionId(response);
     }
 
     private String extractHostId(HttpResponse response) {
@@ -133,6 +97,19 @@ public class Transaction {
             }
         }
 
-        throw new FluentClientException("Unable to get hostId cookie from response. Response: " + response);
+        throw UnableToOpenTransactionException.noHostId(response);
+    }
+
+    private HttpResponse executePost(String uri) {
+        try {
+            return Executor
+                    .newInstance(client.getHttpClient())
+                    .execute(Request
+                            .Post(uri)
+                            .addHeader("Cookie", "HostId=" + hostId))
+                    .returnResponse();
+        } catch (Exception e) {
+            throw new FluentClientException(e);
+        }
     }
 }

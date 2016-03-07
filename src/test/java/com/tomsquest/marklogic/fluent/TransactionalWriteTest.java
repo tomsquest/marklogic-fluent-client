@@ -58,11 +58,15 @@ public class TransactionalWriteTest {
 
     @Test
     public void inTransaction_rollback() throws Exception {
-        client.inTransaction((tran) -> {
-            tran.rollback(); // make it fail
+        try {
+            client.inTransaction((tran) -> {
+                tran.rollback(); // make it fail
 
-            client.write("{}").toUri("/foo").inTransaction(tran).asText();
-        });
+                client.write("{}").toUri("/foo").inTransaction(tran).asText();
+            });
+        } catch (Exception e) {
+            // ignore
+        }
 
         assertThat(client.exists("/foo")).isFalse();
     }

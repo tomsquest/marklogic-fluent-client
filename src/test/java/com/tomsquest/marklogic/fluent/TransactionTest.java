@@ -39,7 +39,7 @@ public class TransactionTest {
 
         new Transaction(client).open();
 
-        verify(httpClient).execute(assertArg((req) -> {
+        verify(httpClient).execute(assertArg(req -> {
             assertThat(req.getMethod()).isEqualTo("POST");
             assertThat(req.getURI().toString()).contains("/v1/transactions");
         }), any(HttpContext.class));
@@ -95,7 +95,7 @@ public class TransactionTest {
 
         transaction.commit();
 
-        verify(httpClient).execute(assertArg((req) -> {
+        verify(httpClient).execute(assertArg(req -> {
             assertThat(req.getMethod()).isEqualTo("POST");
             assertThat(req.getURI().toString()).contains("/v1/transactions/123");
             assertThat(req.getURI().toString()).contains("result=commit");
@@ -109,7 +109,7 @@ public class TransactionTest {
 
         transaction.commit();
 
-        verify(httpClient).execute(assertArg((req) -> {
+        verify(httpClient).execute(assertArg(req -> {
             assertThat(req.getURI().toString()).contains("/v1/transactions/123");
             assertThat(req.getFirstHeader("Cookie").getValue()).isEqualTo("HostId=345");
         }), any(HttpContext.class));
@@ -130,7 +130,7 @@ public class TransactionTest {
 
         transaction.rollback();
 
-        verify(httpClient).execute(assertArg((req) -> {
+        verify(httpClient).execute(assertArg(req -> {
             assertThat(req.getMethod()).isEqualTo("POST");
             assertThat(req.getURI().toString()).contains("/v1/transactions/123");
             assertThat(req.getURI().toString()).contains("result=rollback");
@@ -144,7 +144,7 @@ public class TransactionTest {
 
         transaction.rollback();
 
-        verify(httpClient).execute(assertArg((req) -> {
+        verify(httpClient).execute(assertArg(req -> {
             assertThat(req.getURI().toString()).contains("/v1/transactions/123");
             assertThat(req.getFirstHeader("Cookie").getValue()).isEqualTo("HostId=345");
         }), any(HttpContext.class));

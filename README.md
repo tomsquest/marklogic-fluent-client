@@ -57,6 +57,7 @@ mvn clean verify
 * [ ] Parameter validation (not nulls...)
 * [ ] Parameters in `Transform`
 * [ ] In `WriteOperation`, optional fields could be `Optional` instead of null
+* [ ] Don't catch the thrown Exception in `client.delete`
 
 # DONE
 

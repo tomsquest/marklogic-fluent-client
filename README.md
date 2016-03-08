@@ -56,6 +56,7 @@ mvn clean verify
 * [ ] Writer for JSON
 * [ ] Parameter validation (not nulls...)
 * [ ] Parameters in `Transform`
+* [ ] In `WriteOperation`, optional fields could be `Optional` instead of null
 
 # DONE
 

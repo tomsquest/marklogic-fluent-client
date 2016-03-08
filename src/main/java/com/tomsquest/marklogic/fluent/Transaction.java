@@ -39,7 +39,7 @@ public class Transaction {
             LOG.info("{} opened", this);
             return this;
         } else {
-            throw UnableToOpenTransactionException.invalidServerResponse(response.getStatusLine());
+            throw UnableToOpenTransactionException.invalidServerResponse(response);
         }
     }
 

@@ -1,16 +1,15 @@
 package com.tomsquest.marklogic.fluent;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.StatusLine;
 
 public class UnableToOpenTransactionException extends FluentClientException {
 
-    public UnableToOpenTransactionException(String msg) {
+    private UnableToOpenTransactionException(String msg) {
         super(msg);
     }
 
-    public static UnableToOpenTransactionException invalidServerResponse(StatusLine statusLine) {
-        return new UnableToOpenTransactionException("Server returned an error: " + statusLine);
+    public static UnableToOpenTransactionException invalidServerResponse(HttpResponse response) {
+        return new UnableToOpenTransactionException("Server returned an error: " + response);
     }
 
     public static UnableToOpenTransactionException noTransactionId(HttpResponse response) {

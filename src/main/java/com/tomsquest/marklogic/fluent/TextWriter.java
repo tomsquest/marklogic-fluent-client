@@ -9,7 +9,7 @@ import org.apache.http.entity.ContentType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 
 public class TextWriter implements Writer {
@@ -23,6 +23,18 @@ public class TextWriter implements Writer {
 
     @Override
     public void write(Client.WriteOperation writeOperation) {
+        String uri = buildUri(writeOperation);
+        Request request = buildRequest(writeOperation, uri);
+        HttpResponse response = execute(request);
+
+        if (response.getStatusLine().getStatusCode() == HttpStatus.SC_CREATED) {
+            LOG.info("Success writing to {}", uri);
+        } else {
+            throw new UnableToWriteException(uri, response);
+        }
+    }
+
+    private String buildUri(Client.WriteOperation writeOperation) {
         try {
             URIBuilder uriBuilder = new URIBuilder(client.getServerUrl() + "/v1/documents");
             uriBuilder.addParameter("uri", writeOperation.getUri());
@@ -35,32 +47,34 @@ public class TextWriter implements Writer {
                 uriBuilder.addParameter("txid", writeOperation.getTransaction().getId());
             }
 
-            // TODO transform + params
-            // TODO triples
+            return uriBuilder.build().toString();
+        } catch (URISyntaxException e) {
+            throw new FluentClientException(e);
+        }
+    }
 
-            URI uri = uriBuilder.build();
-            Request request = Request
-                    .Put(uri)
-                    .bodyString(
-                            writeOperation.getValue().toString(),
-                            ContentType.TEXT_PLAIN.withCharset(StandardCharsets.UTF_8));
+    private Request buildRequest(Client.WriteOperation writeOperation, String uri) {
+        Request request = Request
+                .Put(uri)
+                .bodyString(
+                        writeOperation.getValue().toString(),
+                        ContentType.TEXT_PLAIN.withCharset(StandardCharsets.UTF_8));
 
-            if (writeOperation.getTransaction() != null) {
-                request.addHeader("Cookie", "HostId=" + writeOperation.getTransaction().getHostId());
-            }
+        if (writeOperation.getTransaction() != null) {
+            request.addHeader("Cookie", "HostId=" + writeOperation.getTransaction().getHostId());
+        }
 
-            HttpResponse response = Executor
+        return request;
+    }
+
+    private HttpResponse execute(Request request) {
+        try {
+            return Executor
                     .newInstance(client.getHttpClient())
                     .execute(request)
                     .returnResponse();
-
-            if (response.getStatusLine().getStatusCode() == HttpStatus.SC_CREATED) {
-                LOG.info("Success writing to {}", uri);
-            } else {
-                throw new FluentClientException("Unable to write to uri '" + uri + "'. Response: " + response.getStatusLine());
-            }
         } catch (Exception e) {
-            throw new FluentClientException(e);
+            throw new UnableToWriteException(request, e);
         }
     }
 }

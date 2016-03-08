@@ -1,9 +1,6 @@
 package com.tomsquest.marklogic.fluent;
 
 public class FluentClientException extends RuntimeException {
-    public FluentClientException() {
-        super();
-    }
 
     public FluentClientException(Throwable cause) {
         super(cause);

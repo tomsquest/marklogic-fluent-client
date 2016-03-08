@@ -53,21 +53,21 @@ mvn clean verify
 
 # TODO
 
-* [ ] Handle erroneous transaction response
 * [ ] Writer for JSON
 * [ ] Parameter validation (not nulls...)
 * [ ] Parameters in `Transform`
 
 # DONE
 
-* [ ] Working DSL
-* [ ] String/Text writer
-* [ ] Transaction open/commit/rollback
-* [ ] In transaction, add the `HostId` cookie for load-balancing
+* [x] Working DSL
+* [x] String/Text writer
+* [x] Transaction open/commit/rollback
+* [x] In transaction, add the `HostId` cookie for load-balancing
+* [x] Handle erroneous transaction response
 
 # Future
 
-* Xml Support
+* XML Support
 * Config builder
 * Choice of HTTP client implementation : not only Apache's HttpClient, consider using Google http-java-client to wrap other clients
 * Select or build a Triples/RDF implementation (DIY, Jena, Sesame, Commons-rdf...)

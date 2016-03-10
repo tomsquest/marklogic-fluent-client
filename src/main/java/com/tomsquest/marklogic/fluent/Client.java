@@ -85,26 +85,8 @@ public class Client implements AutoCloseable {
     }
 
     public Client delete(String... uris) {
-        try {
-            URIBuilder uriBuilder = new URIBuilder(serverUrl + "/v1/documents");
-            Arrays.asList(uris).forEach(uri -> uriBuilder.addParameter("uri", uri));
-
-            HttpResponse response = Executor
-                    .newInstance(httpClient)
-                    .execute(Request.Delete(uriBuilder.build()))
-                    .returnResponse();
-
-            int receivedStatus = response.getStatusLine().getStatusCode();
-            if (receivedStatus == HttpStatus.SC_NO_CONTENT) {
-                LOG.info("Deleted uris {}", Arrays.toString(uris));
-                return this;
-            }
-
-            throw new FluentClientException("Invalid server response: " + response.getStatusLine() + ". "
-                    + "Expected " + HttpStatus.SC_OK + " and got " + receivedStatus);
-        } catch (Exception e) {
-            throw new FluentClientException(e);
-        }
+        new DeleteCommand(this, uris).run();
+        return this;
     }
 
     public WriteToUri write(Object value) {

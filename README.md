@@ -57,7 +57,6 @@ mvn clean verify
 * [ ] Parameter validation (not nulls...)
 * [ ] Parameters in `Transform`
 * [ ] In `WriteOperation`, optional fields could be `Optional` instead of null
-* [ ] Don't catch the thrown Exception in `client.delete`
 
 # DONE
 
@@ -65,7 +64,6 @@ mvn clean verify
 * [x] String/Text writer
 * [x] Transaction open/commit/rollback
 * [x] In transaction, add the `HostId` cookie for load-balancing
-* [x] Handle erroneous transaction response
 
 # Future
 
